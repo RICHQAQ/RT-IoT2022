@@ -4,7 +4,8 @@ import numpy as np
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.svm import SVC
 from models_cla.GradientBoosting import GradientBoostingClassifier
-from models_cla import RandomForest
+from sklearn.naive_bayes import GaussianNB
+from models_cla import RandomForest, SVM, NaiveBayesClassifier
 from sklearn.metrics import accuracy_score, classification_report, confusion_matrix
 from sklearn.preprocessing import StandardScaler
 import seaborn as sns
@@ -22,7 +23,7 @@ def train_and_evaluate(name, model, X_train_scaled, y_train, X_val_scaled, y_tes
     os.makedirs(f"output/{name}", exist_ok=True)
     print(f"\n训练 {name} 并绘制学习曲线...")
 
-    # # 绘制学习曲线并获取训练集和验证集的得分
+    # 绘制学习曲线并获取训练集和验证集的得分
     # train_sizes, train_scores, test_scores, fit_times, _ = learning_curve(
     #     model,
     #     X_train_scaled,
@@ -74,21 +75,31 @@ def main():
     y_train = train_data["Attack_type"]
     X_test = test_data.drop("Attack_type", axis=1)
     y_test = test_data["Attack_type"]
-
+    # 转换为numpy数组
+    X_train = np.asarray(X_train)
+    y_train = np.asarray(y_train)
+    X_test = np.asarray(X_test)
+    y_test = np.asarray(y_test)
     # 标准化数据
     scaler = StandardScaler()
     X_train_scaled = scaler.fit_transform(X_train)
     X_val_scaled = scaler.transform(X_test)
 
     # 初始化模型
+    """ 
+        这里有sk的是sklearn的模型，没有的是自己写的模型
+        用于比较自己写的模型和sklearn的模型 
+    """
     non_ai_models = {
-        # 'RandomForest': RandomForestClassifier(n_estimators=100),
         # "skRandomForest": RandomForestClassifier(n_estimators=10, random_state=42),
-        "RandomForest": RandomForest(n_trees=5, random_state=42),
+        # "RandomForest": RandomForest(n_estimators=10, random_state=42),
         # "GradientBoosting": GradientBoostingClassifier(
         #     n_estimators=10, random_state=42
         # ),
-        # 'SVC': SVC(kernel='linear', random_state=42),
+        # 'skSVC': SVC(kernel='linear', random_state=42),
+        # 'SVM': SVM(kernel='linear', random_state=42), #自己写的这个速度太慢了，可能不用
+        'skGaussianNB': GaussianNB(),
+        'NaiveBayes': NaiveBayesClassifier(), #太慢了
     }
 
     ai_models = {}

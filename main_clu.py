@@ -1,13 +1,14 @@
 import pandas as pd
 import numpy as np
 from sklearn.cluster import KMeans, DBSCAN, AgglomerativeClustering
+from sklearn.mixture import GaussianMixture
 from sklearn.preprocessing import StandardScaler
 from sklearn.metrics import silhouette_score, calinski_harabasz_score, davies_bouldin_score
 import matplotlib.pyplot as plt
 import seaborn as sns
 import os
 from rich.progress import track
-from models_clu.clustering import EM
+from models_clu import EM
 from sklearn.decomposition import PCA
 
 plt.rcParams["font.sans-serif"] = ["SimHei"]
@@ -82,16 +83,17 @@ def main():
 
     # 初始化聚类模型
     models = {
-        'KMeans': KMeans(n_clusters=n_clusters, random_state=42),
+        # 'KMeans': KMeans(n_clusters=n_clusters, random_state=42),
         # 'DBSCAN': DBSCAN(eps=0.5, min_samples=5),
         # 'Agglomerative': AgglomerativeClustering(n_clusters=n_clusters),
-        'EM': EM(n_components=n_clusters)
+        'GaussianMixture': GaussianMixture(n_components=n_clusters, random_state=42),
+        'EM': EM(n_components=n_clusters, random_state=42)
     }
 
     # 评估模型
     results = []
     for name, model in track(models.items(), description="评估聚类模型"):
-        result = evaluate_clustering(name, model, X)
+        result = evaluate_clustering(name, model, X_scaled)
         results.append(result)
 
     # 生成评估报告
@@ -107,6 +109,29 @@ def main():
             f.write("-" * 50 + "\n")
 
     # 绘制评估指标对比图
+    """
+        # 聚类评估指标说明
+
+        ## 轮廓系数 (Silhouette Score)
+        - 衡量样本在自己所在簇的紧密程度与其他簇的分离程度
+        - 取值范围: [-1, 1]
+        - 分数越接近1表示聚类效果越好
+        - 分数越接近-1表示可能被分配到错误的簇
+        - 0附近表示簇之间有重叠
+
+        ## Calinski-Harabasz指数
+        - 又称为方差比准则(VRC)
+        - 计算簇间离散度与簇内离散度的比值
+        - 取值范围: [0, +∞)
+        - 分数越高表示聚类越密集且簇间分离度越好
+        - 适用于评估凸形簇
+
+        ## Davies-Bouldin指数
+        - 评估簇内样本的平均相似度与簇间样本的相似度比值
+        - 取值范围: [0, +∞)
+        - 分数越小表示聚类效果越好
+        - 对噪声较为敏感
+    """
     metrics = ['silhouette', 'calinski_harabasz', 'davies_bouldin']
     for metric in metrics:
         plt.figure(figsize=(10, 6))
