@@ -24,27 +24,27 @@ def train_and_evaluate(name, model, X_train_scaled, y_train, X_val_scaled, y_tes
     print(f"\n训练 {name} 并绘制学习曲线...")
 
     # 绘制学习曲线并获取训练集和验证集的得分
-    # train_sizes, train_scores, test_scores, fit_times, _ = learning_curve(
-    #     model,
-    #     X_train_scaled,
-    #     y_train,
-    #     cv=5,
-    #     n_jobs=2,
-    #     train_sizes=np.linspace(0.2, 1.0, 5),
-    #     return_times=True,
-    # )
-    # train_scores_mean = np.mean(train_scores, axis=1)
-    # test_scores_mean = np.mean(test_scores, axis=1)
+    train_sizes, train_scores, test_scores, fit_times, _ = learning_curve(
+        model,
+        X_train_scaled,
+        y_train,
+        cv=5,
+        n_jobs=2,
+        train_sizes=np.linspace(0.2, 1.0, 5),
+        return_times=True,
+    )
+    train_scores_mean = np.mean(train_scores, axis=1)
+    test_scores_mean = np.mean(test_scores, axis=1)
 
-    # plt.figure()
-    # plt.plot(train_sizes, train_scores_mean, "o-", label="训练得分")
-    # plt.plot(train_sizes, test_scores_mean, "o-", label="验证得分")
-    # plt.title(f"{name} 学习曲线")
-    # plt.xlabel("训练样本数")
-    # plt.ylabel("得分")
-    # plt.legend(loc="best")
-    # plt.savefig(f"output/{name}/learning_curve.png")
-    # plt.close()
+    plt.figure()
+    plt.plot(train_sizes, train_scores_mean, "o-", label="训练得分")
+    plt.plot(train_sizes, test_scores_mean, "o-", label="验证得分")
+    plt.title(f"{name} 学习曲线")
+    plt.xlabel("训练样本数")
+    plt.ylabel("得分")
+    plt.legend(loc="best")
+    plt.savefig(f"output/{name}/learning_curve.png")
+    plt.close()
 
     model.fit(X_train_scaled, y_train)
     val_pred = model.predict(X_val_scaled)
@@ -91,15 +91,15 @@ def main():
         用于比较自己写的模型和sklearn的模型 
     """
     non_ai_models = {
-        # "skRandomForest": RandomForestClassifier(n_estimators=10, random_state=42),
-        # "RandomForest": RandomForest(n_estimators=10, random_state=42),
-        # "GradientBoosting": GradientBoostingClassifier(
-        #     n_estimators=10, random_state=42
-        # ),
+        "skRandomForest": RandomForestClassifier(n_estimators=10, random_state=42),
+        "RandomForest": RandomForest(n_estimators=10, random_state=42),
+        "GradientBoosting": GradientBoostingClassifier(
+            n_estimators=10, random_state=42
+        ),
         # 'skSVC': SVC(kernel='linear', random_state=42),
         # 'SVM': SVM(kernel='linear', random_state=42), #自己写的这个速度太慢了，可能不用
-        'skGaussianNB': GaussianNB(),
-        'NaiveBayes': NaiveBayesClassifier(), #太慢了
+        # 'skGaussianNB': GaussianNB(),
+        # 'NaiveBayes': NaiveBayesClassifier(), #太慢了
     }
 
     ai_models = {}
@@ -120,12 +120,12 @@ def main():
     plt.ylabel("准确率")
     plt.xticks(rotation=45)
     plt.tight_layout()
-    plt.savefig("output/model_comparison.png")
+    plt.savefig("output/cla_model_comparison.png")
     plt.close()
 
     # 生成总结报告
     best_model = max(results.items(), key=lambda x: x[1])
-    with open("output/summary_report.txt", "w", encoding="utf-8") as f:
+    with open("output/cla_report.txt", "w", encoding="utf-8") as f:
         f.write("模型训练评估总结报告\n")
         f.write("=" * 50 + "\n\n")
         f.write(f"评估模型数量: {len(results)}\n")
@@ -137,7 +137,7 @@ def main():
 
     print("\n训练评估完成!")
     print(f"最佳模型: {best_model[0]}，准确率: {best_model[1]:.4f}")
-    print("详细报告已保存至 output/summary_report.txt")
+    print("详细报告已保存至 output/cla_report.txt")
 
 
 if __name__ == "__main__":
